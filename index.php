@@ -9,12 +9,11 @@ ini_set('display_errors',1);
     
     $model = new TareaModel();
     $tareas = $model->TareaList();
-    print_r($tareas);
-    $prueba = $model->searchTask(2);
+    //print_r($tareas);
+    $prueba = $model->searchTask(7);
     print_r($prueba);
 
-    $model->deleteTask(2);
-    $model->updateTask(3,['nombre'=>'Tarea #3','descripcion'=>'Estudiar Materialize']);
+    session_start();
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -28,6 +27,9 @@ ini_set('display_errors',1);
     <div class="container">
         <div class="row">
             <div class="col l4 m4 s12">
+
+                <?php if(!isset($_SESSION['editar'])) { ?>
+                <!--AGREGAR TAREA-->
                 <h4 class="center">Nueva Tarea</h4>
                 <form action="controllers/ControlInsert.php" method="POST">
                     <div class="input-field">
@@ -42,16 +44,40 @@ ini_set('display_errors',1);
                 </form>
                 <p>
                     <?php
-                        session_start();
                         if(isset($_SESSION['resp'])){
                             echo $_SESSION['resp'];
                             unset($_SESSION['resp']);
                         }
                     ?>
                 </p>
-            </div>
+                <!--FIN AGREGAR TAREA-->
+                <?php }else { ?>
+                <!--EDITAR TAREA-->
+                <h4 class="center">Editar Tarea</h4>
+                    <form action="controllers/ControlEdit.php" method="POST">
+                        <input type="hidden" name="id" value="<?=$_SESSION['tarea']['id']?>">
+                        <div class="input-field">
+                            <input id="nombre" type="text" name="nombre" value="<?=$_SESSION['tarea']['nombre']?>">
+                            <label for="nombre">Nombre</label>
+                        </div>
+
+                        <div class="input-field">
+                            <input id="descripcion" type="text" name="desc" value="<?=$_SESSION['tarea']['descripcion']?>">
+                            <label for="descripcion">Descripcion</label>
+                        </div>
+                        <button class="btn orange">Editar tarea</button>
+                    </form>
+                <!--FIN EDITAR TAREA-->
+                <?php
+                    unset( $_SESSION['editar']);
+                    unset($_SESSION['tarea']);
+                    } 
+                ?>    
+
+            </div>      
             <div class="col l8 m8 s12">
                 <h4 class="center">Listado de Tareas</h4>
+                <form action="controllers/ControlTabla.php" method="POST">
                 <table>
                     <tr>
                         <th>ID</th>
@@ -64,13 +90,16 @@ ini_set('display_errors',1);
                             <td><?=$item["nombre"]?></td>
                             <td><?=$item["descripcion"]?></td>
                             <td>
-                                <button class="btn">Editar</button>
-                                <button class="btn">Eliminar</button>
+                                <button name="bt_edit" value="<?=$item["id"]?>" class="btn">Editar</button>
+                                <button name="bt_delete" value="<?=$item["id"]?>"class="btn">Eliminar</button>
                             </td>
                         </tr>    
                     <?php } ?>
                 </table>
+                </form>
             </div>
+
+
         </div>
     </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
